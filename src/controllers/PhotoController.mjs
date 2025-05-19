@@ -1,13 +1,11 @@
-import PhotoModel from '../models/Photo.mjs';
-import AlbumModel from '../models/Album.mjs';
+import PhotoModel from '../models/photo.mjs';
+import AlbumModel from '../models/album.mjs';
 
 const Photos = class Photos {
   constructor(app, connect) {
     this.app = app;
     this.PhotoModel = connect.model('Photo', PhotoModel);
     this.AlbumModel = connect.model('Album', AlbumModel);
-    this.PhotoModel = PhotoModel;
-    this.AlbumModel = AlbumModel;
     this.run();
   }
 
