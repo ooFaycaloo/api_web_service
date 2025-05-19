@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Album from '../models/album.mjs';
+import Album from '../models/Album.mjs';
 
 const Albums = class Albums {
   constructor(app, connect) {
