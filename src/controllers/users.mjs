@@ -1,75 +1,68 @@
 import UserModel from '../models/user.mjs';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const Users = class Users {
   constructor(app, connect) {
     this.app = app;
     this.UserModel = connect.model('User', UserModel);
-
     this.run();
+  }
+
+  login() {
+    this.app.post('/login', (req, res) => {
+      const { firstname } = req.body;
+
+      this.UserModel.findOne({ firstname })
+        .then(user => {
+          if (!user) {
+            return res.status(404).json({ code: 404, message: 'Utilisateur introuvable' });
+          }
+
+          const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' });
+
+          return res.status(200).json({ token });
+        })
+        .catch(() => res.status(500).json({ code: 500, message: 'Erreur serveur' }));
+    });
   }
 
   deleteById() {
     this.app.delete('/user/:id', (req, res) => {
-      try {
-        this.UserModel.findByIdAndDelete(req.params.id).then((user) => {
-          res.status(200).json(user || {});
-        }).catch(() => {
-          res.status(500).json({
-            code: 500,
-            message: 'Internal Server error'
-          });
+      this.UserModel.findByIdAndDelete(req.params.id).then((user) => {
+        res.status(200).json(user || {});
+      }).catch(() => {
+        res.status(500).json({
+          code: 500,
+          message: 'Internal Server error'
         });
-      } catch (err) {
-        console.error(`[ERROR] users/:id -> ${err}`);
-
-        res.status(400).json({
-          code: 400,
-          message: 'Bad request'
-        });
-      }
+      });
     });
   }
 
   showById() {
     this.app.get('/user/:id', (req, res) => {
-      try {
-        this.UserModel.findById(req.params.id).then((user) => {
-          res.status(200).json(user || {});
-        }).catch(() => {
-          res.status(500).json({
-            code: 500,
-            message: 'Internal Server error'
-          });
+      this.UserModel.findById(req.params.id).then((user) => {
+        res.status(200).json(user || {});
+      }).catch(() => {
+        res.status(500).json({
+          code: 500,
+          message: 'Internal Server error'
         });
-      } catch (err) {
-        console.error(`[ERROR] users/:id -> ${err}`);
-
-        res.status(400).json({
-          code: 400,
-          message: 'Bad request'
-        });
-      }
+      });
     });
   }
 
   create() {
-    this.app.post('/user/', (req, res) => {
-      try {
-        const userModel = new this.UserModel(req.body);
+    this.app.post('/user', (req, res) => {
+      const userModel = new this.UserModel(req.body);
 
-        userModel.save().then((user) => {
-          res.status(200).json(user || {});
-        }).catch(() => {
-          res.status(200).json({});
-        });
-      } catch (err) {
-        console.error(`[ERROR] users/create -> ${err}`);
-
-        res.status(400).json({
-          code: 400,
-          message: 'Bad request'
-        });
-      }
+      userModel.save().then((user) => {
+        res.status(200).json(user || {});
+      }).catch(() => {
+        res.status(500).json({});
+      });
     });
   }
 
@@ -77,6 +70,7 @@ const Users = class Users {
     this.create();
     this.showById();
     this.deleteById();
+    this.login(); 
   }
 };
 

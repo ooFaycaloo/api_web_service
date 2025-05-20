@@ -1,14 +1,17 @@
-// Dependencies
 import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import dotenv from 'dotenv';
 
-// Core
 import config from './config.mjs';
 import routes from './controllers/routes.mjs';
+import errorHandler from './middlewares/errorHandler.mjs';
+
+dotenv.config();
 
 const Server = class Server {
   constructor() {
@@ -40,7 +43,6 @@ const Server = class Server {
           console.log('[ERROR] api dbConnect() -> mongodb error');
           this.connect = this.dbConnect(host);
         }, 5000);
-
         console.error(`[ERROR] api dbConnect() -> ${err}`);
       });
 
@@ -62,10 +64,22 @@ const Server = class Server {
   }
 
   middleware() {
+    const limiter = rateLimit({
+      windowMs: 60 * 60 * 1000, 
+      max: 100,
+      message: 'Trop de requêtes, réessayez plus tard.'
+    });
+
+    this.app.use(helmet());
+    this.app.use(cors({
+      origin: ['http://localhost:3001'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      allowedHeaders: ['Content-Type', 'Authorization']
+    }));
     this.app.use(compression());
-    this.app.use(cors());
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(bodyParser.json());
+    this.app.use(limiter);
   }
 
   routes() {
@@ -74,25 +88,19 @@ const Server = class Server {
     new routes.Photos(this.app, this.connect);
 
     this.app.use((req, res) => {
-      res.status(404).json({
-        code: 404,
-        message: 'Not Found'
-      });
+      res.status(404).json({ code: 404, message: 'Not Found' });
     });
-  }
-
-  security() {
-    this.app.use(helmet());
-    this.app.disable('x-powered-by');
   }
 
   async run() {
     try {
       await this.dbConnect();
-      this.security();
       this.middleware();
       this.routes();
-      this.app.listen(this.config.port);
+      this.app.use(errorHandler); 
+      this.app.listen(this.config.port, () => {
+        console.log(`Serveur en ligne sur le port ${this.config.port}`);
+      });
     } catch (err) {
       console.error(`[ERROR] Server -> ${err}`);
     }

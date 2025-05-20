@@ -1,5 +1,6 @@
-import PhotoModel from '../models/photo.mjs';
+import PhotoModel from '../models/Photo.mjs';
 import AlbumModel from '../models/album.mjs';
+import authMiddleware from '../middlewares/auth.mjs';
 
 const Photos = class Photos {
   constructor(app, connect) {
@@ -10,7 +11,7 @@ const Photos = class Photos {
   }
 
   create() {
-    this.app.post('/album/:idalbum/photo', async (req, res) => {
+    this.app.post('/album/:idalbum/photo', authMiddleware, async (req, res) => {
       const photo = new this.PhotoModel({
         ...req.body,
         album: req.params.idalbum
@@ -29,7 +30,7 @@ const Photos = class Photos {
   }
 
   getAllFromAlbum() {
-    this.app.get('/album/:idalbum/photos', (req, res) => {
+    this.app.get('/album/:idalbum/photos', authMiddleware, (req, res) => {
       this.PhotoModel.find({ album: req.params.idalbum })
         .populate('album')
         .then((photos) => res.status(200).json(photos))
@@ -38,7 +39,7 @@ const Photos = class Photos {
   }
 
   getByIdFromAlbum() {
-    this.app.get('/album/:idalbum/photo/:idphotos', (req, res) => {
+    this.app.get('/album/:idalbum/photo/:idphotos', authMiddleware, (req, res) => {
       this.PhotoModel.findOne({ _id: req.params.idphotos, album: req.params.idalbum })
         .populate('album')
         .then((foundPhoto) => {
@@ -52,7 +53,7 @@ const Photos = class Photos {
   }
 
   updateById() {
-    this.app.put('/album/:idalbum/photo/:idphotos', (req, res) => {
+    this.app.put('/album/:idalbum/photo/:idphotos', authMiddleware, (req, res) => {
       this.PhotoModel.findByIdAndUpdate(req.params.idphotos, req.body, { new: true })
         .then((updatedPhoto) => {
           if (!updatedPhoto) {
@@ -65,7 +66,7 @@ const Photos = class Photos {
   }
 
   deleteById() {
-    this.app.delete('/album/:idalbum/photo/:idphotos', async (req, res) => {
+    this.app.delete('/album/:idalbum/photo/:idphotos', authMiddleware, async (req, res) => {
       this.PhotoModel.findByIdAndDelete(req.params.idphotos)
         .then(async (deletedPhoto) => {
           if (!deletedPhoto) {
