@@ -1,6 +1,15 @@
 import mongoose from 'mongoose';
 import Album from '../models/album.mjs';
 import authMiddleware from '../middlewares/auth.mjs';
+import validator from 'better-validator';
+
+const validateAlbum = (data) => {
+  const v = new validator();
+  v(data).required().object();
+  v(data.title).required().string().minLength(2);
+  v(data.description).optional().string();
+  return v.run();
+};
 
 const Albums = class Albums {
   constructor(app, connect) {
@@ -50,6 +59,11 @@ const Albums = class Albums {
 
   updateById() {
     this.app.put('/album/:id', authMiddleware, (req, res) => {
+      const errors = validateAlbum(req.body);
+      if (errors.length) {
+        return res.status(400).json({ code: 400, message: 'Validation failed', errors });
+      }
+
       const { id } = req.params;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
