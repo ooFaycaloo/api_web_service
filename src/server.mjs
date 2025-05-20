@@ -65,7 +65,7 @@ const Server = class Server {
 
   middleware() {
     const limiter = rateLimit({
-      windowMs: 60 * 60 * 1000, 
+      windowMs: 60 * 60 * 1000,
       max: 100,
       message: 'Trop de requêtes, réessayez plus tard.'
     });
@@ -97,7 +97,7 @@ const Server = class Server {
       await this.dbConnect();
       this.middleware();
       this.routes();
-      this.app.use(errorHandler); 
+      this.app.use(errorHandler);
       this.app.listen(this.config.port, () => {
         console.log(`Serveur en ligne sur le port ${this.config.port}`);
       });

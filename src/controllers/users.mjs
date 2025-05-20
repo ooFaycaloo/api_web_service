@@ -1,6 +1,7 @@
-import UserModel from '../models/user.mjs';
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
+import UserModel from '../models/user.mjs';
+
 dotenv.config();
 
 const Users = class Users {
@@ -15,7 +16,7 @@ const Users = class Users {
       const { firstname } = req.body;
 
       this.UserModel.findOne({ firstname })
-        .then(user => {
+        .then((user) => {
           if (!user) {
             return res.status(404).json({ code: 404, message: 'Utilisateur introuvable' });
           }
@@ -70,7 +71,7 @@ const Users = class Users {
     this.create();
     this.showById();
     this.deleteById();
-    this.login(); 
+    this.login();
   }
 };
 

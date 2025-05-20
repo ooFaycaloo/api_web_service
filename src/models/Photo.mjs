@@ -6,7 +6,7 @@ const photoSchema = new mongoose.Schema(
     url: { type: String, required: true },
     description: { type: String },
     album: { type: mongoose.Schema.Types.ObjectId, ref: 'Album', required: true },
-    created_at: { type: Date, default: Date.now } 
+    created_at: { type: Date, default: Date.now }
   }
 );
 

@@ -1,10 +1,10 @@
+import validator from 'better-validator';
 import mongoose from 'mongoose';
 import Album from '../models/album.mjs';
 import authMiddleware from '../middlewares/auth.mjs';
-import validator from 'better-validator';
 
 const validateAlbum = (data) => {
-  const v = new validator();
+  const v = validator();
   v(data).required().object();
   v(data.title).required().string().minLength(2);
   v(data.description).optional().string();
