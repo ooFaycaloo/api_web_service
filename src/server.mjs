@@ -86,6 +86,7 @@ const Server = class Server {
     new routes.Users(this.app, this.connect);
     new routes.Albums(this.app, this.connect);
     new routes.Photos(this.app, this.connect);
+    new routes.UserProfile(this.app);
 
     this.app.use((req, res) => {
       res.status(404).json({ code: 404, message: 'Not Found' });

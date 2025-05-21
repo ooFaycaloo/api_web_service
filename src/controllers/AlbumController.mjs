@@ -100,6 +100,50 @@ const Albums = class Albums {
     });
   }
 
+  generateUserProfile() {
+    this.app.get('/user-profile', async (req, res) => {
+      try {
+        // Imports dynamiques (si besoin, à mettre en haut si tu préfères)
+        const { getRandomUser } = await import('../pipeline/randomUser.js');
+        const {
+          getRandomPhone,
+          getRandomIBAN,
+          getRandomCreditCard,
+          getRandomName,
+          getRandomPet
+        } = await import('../pipeline/randommer.js');
+        const { getWeather, getQuote } = await import('../pipeline/fun.mjs');
+
+        const user = await getRandomUser();
+        const phone = await getRandomPhone();
+        const iban = await getRandomIBAN();
+        const card = await getRandomCreditCard();
+        const name = await getRandomName();
+        const pet = await getRandomPet();
+        const weather = await getWeather();
+        const quote = await getQuote();
+
+        const profile = {
+          nom_complet: `${user.name.first} ${user.name.last}`,
+          email: user.email,
+          photo: user.picture.large,
+          telephone: phone,
+          iban,
+          carte_credit: card,
+          nom_aleatoire: name,
+          animal_de_compagnie: pet,
+          meteo: weather,
+          citation: quote
+        };
+
+        res.status(200).json(profile);
+      } catch (error) {
+        console.error('Erreur profil :', error);
+        res.status(500).json({ error: 'Erreur lors de la génération du profil.' });
+      }
+    });
+  }
+
   run() {
     this.create();
     this.getAll();
