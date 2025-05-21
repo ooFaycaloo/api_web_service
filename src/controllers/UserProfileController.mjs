@@ -12,13 +12,7 @@ const UserProfile = class UserProfile {
   run() {
     this.app.get('/user-profile', async (req, res) => {
       try {
-        // Appels aux API ici...
         const randomUser = await fetch('https://randomuser.me/api').then((r) => r.json());
-
-        // Remplacement de l'API de citation par type.fit
-        const quoteData = await fetch('https://quote-garden.herokuapp.com/api/v3/quotes/random').then((r) => r.json());
-        const quote = quoteData.data[0].quoteText;
-        const author = quoteData.data[0].quoteAuthor || 'Anonyme';
 
         const headers = {
           'X-Api-Key': process.env.RANDOMMER_API_KEY
@@ -40,7 +34,7 @@ const UserProfile = class UserProfile {
           carte_credit: creditCard[0],
           nom_aleatoire: randomName[0],
           animal_de_compagnie: pet[0],
-          citation: `${quote} — ${author}`,
+          // citation retirée
           meteo: `${weather.current.condition.text}, ${weather.current.temp_c}°C`
         };
 
